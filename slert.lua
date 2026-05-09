@@ -1,94 +1,150 @@
-local Rayfield = loadstring(game:HttpGet(
-'https://sirius.menu/rayfield'
-))()
+--// GUI
 
-local Window = Rayfield:CreateWindow({
-   Name = "My Clicker Hub",
-   LoadingTitle = "Loading Hub",
-   LoadingSubtitle = "by you",
-   ConfigurationSaving = {
-      Enabled = false
-   },
-   Discord = {
-      Enabled = false
-   },
-   KeySystem = false
-})
+local gui = Instance.new("ScreenGui")
+gui.Name = "MyHub"
+gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
 
-local MainTab = Window:CreateTab("Main", 4483362458)
+--// Main Frame
 
-local coins = 0
-local clickPower = 1
-local autoClick = false
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 500, 0, 320)
+frame.Position = UDim2.new(0.5, -250, 0.5, -160)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
 
-MainTab:CreateParagraph({
-   Title = "Clicker Game",
-   Content = "Simple Rayfield clicker GUI"
-})
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0,12)
+frameCorner.Parent = frame
 
-MainTab:CreateButton({
-   Name = "Click",
-   Callback = function()
-      coins += clickPower
+--// Top Bar
 
-      Rayfield:Notify({
-         Title = "Coins",
-         Content = "Coins: "..coins,
-         Duration = 1,
-      })
-   end,
-})
+local topbar = Instance.new("Frame")
+topbar.Size = UDim2.new(1,0,0,40)
+topbar.BackgroundColor3 = Color3.fromRGB(35,35,35)
+topbar.BorderSizePixel = 0
+topbar.Parent = frame
 
-MainTab:CreateButton({
-   Name = "Upgrade Click Power",
-   Callback = function()
-      clickPower += 1
+local topCorner = Instance.new("UICorner")
+topCorner.CornerRadius = UDim.new(0,12)
+topCorner.Parent = topbar
 
-      Rayfield:Notify({
-         Title = "Upgrade",
-         Content = "Click Power: "..clickPower,
-         Duration = 1,
-      })
-   end,
-})
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,1,0)
+title.BackgroundTransparency = 1
+title.Text = "My Script Hub"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextColor3 = Color3.new(1,1,1)
+title.Parent = topbar
 
-MainTab:CreateToggle({
-   Name = "Auto Click",
-   CurrentValue = false,
-   Flag = "AutoClick",
-   Callback = function(Value)
-      autoClick = Value
+--// Layout
 
-      while autoClick do
-         coins += clickPower
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0,10)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.VerticalAlignment = Enum.VerticalAlignment.Top
+layout.Parent = frame
 
-         Rayfield:Notify({
-            Title = "Auto Click",
-            Content = "Coins: "..coins,
-            Duration = 0.5,
-         })
+topbar.LayoutOrder = 0
 
-         task.wait(1)
-      end
-   end,
-})
+--// Helper Function
 
-MainTab:CreateSlider({
-   Name = "WalkSpeed",
-   Range = {16, 100},
-   Increment = 1,
-   CurrentValue = 16,
-   Callback = function(Value)
-      local player = game.Players.LocalPlayer
+local function CreateButton(text, callback)
 
-      if player.Character and player.Character:FindFirstChild("Humanoid") then
-         player.Character.Humanoid.WalkSpeed = Value
-      end
-   end,
-})
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0, 450, 0, 45)
+	button.BackgroundColor3 = Color3.fromRGB(45,45,45)
+	button.BorderSizePixel = 0
+	button.Text = text
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 20
+	button.TextColor3 = Color3.new(1,1,1)
+	button.Parent = frame
 
-Rayfield:Notify({
-   Title = "Loaded",
-   Content = "Rayfield GUI loaded successfully",
-   Duration = 3,
-})
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0,10)
+	corner.Parent = button
+
+	button.MouseButton1Click:Connect(callback)
+
+	return button
+end
+
+--// Infinite Jump
+
+CreateButton("Infinite Jump", function()
+
+	getgenv().InfiniteJump = true
+
+	game:GetService("UserInputService").JumpRequest:Connect(function()
+
+		if getgenv().InfiniteJump then
+
+			local humanoid =
+				game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+			if humanoid then
+				humanoid:ChangeState("Jumping")
+			end
+		end
+	end)
+end)
+
+--// WalkSpeed
+
+CreateButton("WalkSpeed 100", function()
+
+	local char = game.Players.LocalPlayer.Character
+
+	if char and char:FindFirstChild("Humanoid") then
+		char.Humanoid.WalkSpeed = 100
+	end
+end)
+
+--// JumpPower
+
+CreateButton("JumpPower 150", function()
+
+	local char = game.Players.LocalPlayer.Character
+
+	if char and char:FindFirstChild("Humanoid") then
+		char.Humanoid.JumpPower = 150
+	end
+end)
+
+--// Spin
+
+CreateButton("Spin Character", function()
+
+	getgenv().Spinning = true
+
+	while getgenv().Spinning do
+
+		local char = game.Players.LocalPlayer.Character
+
+		if char and char:FindFirstChild("HumanoidRootPart") then
+
+			char.HumanoidRootPart.CFrame =
+				char.HumanoidRootPart.CFrame *
+				CFrame.Angles(0, math.rad(20), 0)
+		end
+
+		task.wait()
+	end
+end)
+
+--// Stop Spin
+
+CreateButton("Stop Spin", function()
+	getgenv().Spinning = false
+end)
+
+--// Destroy GUI
+
+CreateButton("Destroy GUI", function()
+	gui:Destroy()
+end)
